@@ -1,5 +1,4 @@
 const https = require('https');
-
 exports.handler = async function(event) {
   const SHEETS_URL = 'https://script.google.com/macros/s/AKfycby4RL9chOq2Gyrn2_a3Zq0axdrjj6rmVn6UAyOpkv9sSJ0vvKX8fkxlNVXXRufPGYPXvw/exec';
 
