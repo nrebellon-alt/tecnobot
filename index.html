@@ -248,13 +248,13 @@ async function sendMessage() {
   document.getElementById('send-btn').disabled = true;
   showTyping();
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-allow-browser': 'true' },
-      body: JSON.stringify({ model: 'claude-opus-4-6', max_tokens: 1000, system: SYSTEM_PROMPT, messages: history })
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+      body: JSON.stringify({ model: 'llama-3.3-70b-versatile', max_tokens: 1000, messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...history] })
     });
     const data = await res.json();
-    const reply = data.content?.[0]?.text || 'Hubo un error. Por favor intenta de nuevo.';
+    const reply = data.choices?.[0]?.message?.content || 'Hubo un error. Por favor intenta de nuevo.';
     hideTyping();
     addMessage('bot', reply);
     history.push({ role: 'assistant', content: reply });
