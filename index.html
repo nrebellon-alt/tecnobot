@@ -49,14 +49,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 #name-input:focus { outline: none; border-color: #7F77DD; }
 #start-btn { background: #534AB7; color: #fff; border: none; border-radius: 10px; padding: 11px 32px; font-size: 14px; cursor: pointer; font-family: inherit; font-weight: 600; transition: background .15s; }
 #start-btn:hover { background: #3C3489; }
-#api-key-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; gap: 14px; padding: 28px 24px; background: #f7f7fb; }
-#api-key-screen .welcome { font-size: 16px; font-weight: 700; color: #222; text-align: center; }
-#api-key-screen p { font-size: 12px; color: #666; text-align: center; line-height: 1.6; max-width: 320px; }
-#api-input { border: 1px solid #ddd; border-radius: 10px; padding: 9px 14px; font-size: 13px; font-family: inherit; width: 100%; max-width: 320px; color: #222; background: #fff; }
-#api-input:focus { outline: none; border-color: #7F77DD; }
-#api-btn { background: #534AB7; color: #fff; border: none; border-radius: 10px; padding: 10px 28px; font-size: 14px; cursor: pointer; font-family: inherit; font-weight: 600; }
-#api-btn:hover { background: #3C3489; }
-.note { font-size: 11px; color: #999; text-align: center; max-width: 300px; line-height: 1.5; }
 </style>
 </head>
 <body>
@@ -69,6 +61,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     </div>
     <div id="score-badge">— / 5.0</div>
   </div>
+
   <div id="name-screen" style="display:none;">
     <div style="width:56px;height:56px;border-radius:50%;background:#7F77DD;display:flex;align-items:center;justify-content:center;font-size:28px;">🤖</div>
     <div class="welcome">¡Hola! Soy TecnoBot</div>
@@ -90,19 +83,52 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
 <script>
 const SHEETS_URL = 'https://script.google.com/macros/s/AKfycby4RL9chOq2Gyrn2_a3Zq0axdrjj6rmVn6UAyOpkv9sSJ0vvKX8fkxlNVXXRufPGYPXvw/exec';
+
 let studentName = '';
 let history = [];
 let sessionEnded = false;
-let apiKey = ' ';
-  
-function startChat() {
+
+async function startChat() {
   const input = document.getElementById('name-input');
   studentName = input.value.trim();
   if (!studentName) { input.focus(); return; }
+
+  const btn = document.getElementById('start-btn');
+  btn.textContent = 'Verificando...';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(SHEETS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'verificar', estudiante: studentName })
+    });
+    const data = await res.json();
+    if (data.yaEvaluado) {
+      btn.textContent = 'Empezar ✦';
+      btn.disabled = false;
+      mostrarBloqueo();
+      return;
+    }
+  } catch(e) {
+    // Si falla la verificación dejamos pasar para no bloquear al estudiante
+  }
+
+  btn.textContent = 'Empezar ✦';
+  btn.disabled = false;
   document.getElementById('name-screen').style.display = 'none';
-  const ca = document.getElementById('chat-area');
-  ca.style.display = 'flex';
+  document.getElementById('chat-area').style.display = 'flex';
   sendBotGreeting();
+}
+
+function mostrarBloqueo() {
+  const screen = document.getElementById('name-screen');
+  screen.innerHTML = `
+    <div style="width:56px;height:56px;border-radius:50%;background:#7F77DD;display:flex;align-items:center;justify-content:center;font-size:28px;">🤖</div>
+    <div style="font-size:17px;font-weight:700;color:#222;text-align:center;">¡Hola ${studentName}!</div>
+    <p style="text-align:center;line-height:1.7;">Ya completaste tu sesión de hoy.<br>Tu reporte fue enviado a tu docente.<br><br>Puedes volver <strong>mañana</strong> para explorar un tema nuevo.</p>
+    <div style="background:#EAF3DE;color:#27500A;font-size:13px;padding:10px 18px;border-radius:10px;text-align:center;">✓ Sesión de hoy completada</div>
+  `;
 }
 
 function sendBotGreeting() {
@@ -129,9 +155,11 @@ function addMessage(role, text) {
     const mejorar = (block.match(/MEJORAR:\s*(.+)/) || [])[1] || '';
     const mensaje = (block.match(/MENSAJE:\s*(.+)/) || [])[1] || '';
     const alerta = (block.match(/ALERTA:\s*(.+)/) || [])[1] || 'NINGUNA';
+
     const badge = document.getElementById('score-badge');
     badge.style.display = 'block';
     badge.textContent = nota + ' / 5.0';
+
     const cleanText = text.replace(/---REPORTE_INICIO---[\s\S]*?---REPORTE_FIN---/, '').trim();
     html = cleanText ? marked.parse(cleanText) : '';
     html += `<div class="eval-card">
@@ -145,13 +173,15 @@ function addMessage(role, text) {
       </div>
       <div id="sync-status" style="background:#FAEEDA;color:#633806;font-size:11px;margin-top:8px;padding:4px 10px;border-radius:20px;display:inline-block;">Guardando en Google Sheets...</div>
     </div>`;
+
     sessionEnded = true;
     setTimeout(() => {
       document.getElementById('user-input').disabled = true;
       document.getElementById('send-btn').disabled = true;
       document.getElementById('user-input').placeholder = 'Sesión completada ✓';
     }, 100);
-    sendToSheets({ estudiante: studentName, nota, fortalezas, mejorar, mensaje, alerta });
+
+    sendToSheets({ action: 'guardar', estudiante: studentName, nota, fortalezas, mejorar, mensaje, alerta });
   } else {
     html = marked.parse(text);
   }
@@ -163,7 +193,12 @@ function addMessage(role, text) {
 
 async function sendToSheets(data) {
   try {
-    await fetch(SHEETS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    const res = await fetch(SHEETS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
     const el = document.getElementById('sync-status');
     if (el) { el.className = 'sync-ok'; el.textContent = '✓ Guardado en Google Sheets'; }
   } catch(e) {
@@ -172,8 +207,14 @@ async function sendToSheets(data) {
   }
 }
 
-function showTyping() { const t = document.getElementById('typing'); t.style.display = 'flex'; document.getElementById('messages').scrollTop = 9999; }
-function hideTyping() { document.getElementById('typing').style.display = 'none'; }
+function showTyping() {
+  const t = document.getElementById('typing');
+  t.style.display = 'flex';
+  document.getElementById('messages').scrollTop = 9999;
+}
+function hideTyping() {
+  document.getElementById('typing').style.display = 'none';
+}
 
 async function sendMessage() {
   if (sessionEnded) return;
@@ -188,7 +229,6 @@ async function sendMessage() {
   try {
     const res = await fetch(SHEETS_URL, {
       method: 'POST',
-      mode: 'cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'chat', messages: history })
     });
@@ -205,11 +245,16 @@ async function sendMessage() {
   input.focus();
 }
 
-function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
-document.getElementById('name-input').addEventListener('keydown', e => { if (e.key === 'Enter') startChat(); });
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+document.getElementById('name-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') startChat();
+});
 
 window.onload = () => {
-   document.getElementById('name-screen').style.display = 'flex';
+  document.getElementById('name-screen').style.display = 'flex';
 };
 </script>
 </body>
