@@ -186,19 +186,20 @@ async function sendMessage() {
   document.getElementById('send-btn').disabled = true;
   showTyping();
   try {
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const res = await fetch(SHEETS_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
-      body: JSON.stringify({ model: 'llama-3.3-70b-versatile', max_tokens: 1000, messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...history] })
+      mode: 'cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'chat', messages: history })
     });
     const data = await res.json();
-    const reply = data.choices?.[0]?.message?.content || 'Hubo un error. Por favor intenta de nuevo.';
+    const reply = data.reply || 'Hubo un error. Por favor intenta de nuevo.';
     hideTyping();
     addMessage('bot', reply);
     history.push({ role: 'assistant', content: reply });
   } catch(e) {
     hideTyping();
-    addMessage('bot', 'Hubo un problema de conexión. Verifica tu clave API e intenta de nuevo.');
+    addMessage('bot', 'Hubo un problema de conexión. Por favor intenta de nuevo.');
   }
   document.getElementById('send-btn').disabled = false;
   input.focus();
