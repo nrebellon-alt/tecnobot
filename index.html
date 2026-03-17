@@ -69,16 +69,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     </div>
     <div id="score-badge">— / 5.0</div>
   </div>
-
-  <div id="api-key-screen">
-    <div style="width:56px;height:56px;border-radius:50%;background:#7F77DD;display:flex;align-items:center;justify-content:center;font-size:28px;">🤖</div>
-    <div class="welcome">Configurar TecnoBot</div>
-    <p>Para activar el bot ingresa tu clave API de Anthropic. Esta clave se guarda solo en tu navegador.</p>
-    <input id="api-input" type="password" placeholder="sk-ant-api03-..."/>
-    <button id="api-btn" onclick="saveApiKey()">Activar Bot</button>
-    <p class="note">Obtén tu clave gratis en <strong>console.groq.com</strong> → API Keys. Solo tú como docente necesitas hacer este paso.</p>
-  </div>
-
   <div id="name-screen" style="display:none;">
     <div style="width:56px;height:56px;border-radius:50%;background:#7F77DD;display:flex;align-items:center;justify-content:center;font-size:28px;">🤖</div>
     <div class="welcome">¡Hola! Soy TecnoBot</div>
@@ -145,19 +135,7 @@ let studentName = '';
 let history = [];
 let sessionEnded = false;
 let apiKey = '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';
-
-function saveApiKey() {
-  const val = document.getElementById('api-input').value.trim();
-  if (!val.startsWith('gsk_')) {
-    alert('La clave no parece válida. Debe empezar con gsk_...');
-    return;
-}
-  apiKey = val;
-  localStorage.setItem('tecnobot_key', val);
-  document.getElementById('api-key-screen').style.display = 'none';
-  document.getElementById('name-screen').style.display = 'flex';
-}
-
+  
 function startChat() {
   const input = document.getElementById('name-input');
   studentName = input.value.trim();
@@ -270,12 +248,7 @@ function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault
 document.getElementById('name-input').addEventListener('keydown', e => { if (e.key === 'Enter') startChat(); });
 
 window.onload = () => {
-  const saved = localStorage.getItem('tecnobot_key');
-  if (saved && saved.startsWith('sk-ant')) {
-    apiKey = saved;
-    document.getElementById('api-key-screen').style.display = 'none';
-    document.getElementById('name-screen').style.display = 'flex';
-  }
+   document.getElementById('name-screen').style.display = 'flex';
 };
 </script>
 </body>
