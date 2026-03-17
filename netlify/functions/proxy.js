@@ -13,7 +13,7 @@ exports.handler = async function(event) {
 
   try {
     const data = JSON.parse(event.body);
-    const GROQ_API_KEY = 'TU_CLAVE_GROQ_AQUI';
+    const GROQ_API_KEY = process.env.GROQ_API_KEY;
     const SHEETS_URL = 'https://script.google.com/macros/s/AKfycby4RL9chOq2Gyrn2_a3Zq0axdrjj6rmVn6UAyOpkv9sSJ0vvKX8fkxlNVXXRufPGYPXvw/exec';
 
     const SYSTEM_PROMPT = `Eres TecnoBot, un tutor amigable y motivador de Tecnología e Informática para estudiantes de grado 6° en Colombia (niños de 11-12 años).
