@@ -89,7 +89,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 </div>
 
 <script>
-const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxsngchJLwhLuodJmSOmH58ZOPy9ZKtPBbCsVfAFRx8YsQslGkDCttWsD4SGbApRGSGjA/exec';
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycby4RL9chOq2Gyrn2_a3Zq0axdrjj6rmVn6UAyOpkv9sSJ0vvKX8fkxlNVXXRufPGYPXvw/exec';
 
 const SYSTEM_PROMPT = `Eres TecnoBot, un tutor amigable y motivador de Tecnología e Informática para estudiantes de grado 6° en Colombia (niños de 11-12 años).
 
@@ -169,6 +169,7 @@ function addMessage(role, text) {
     const fortalezas = (block.match(/FORTALEZAS:\s*(.+)/) || [])[1] || '';
     const mejorar = (block.match(/MEJORAR:\s*(.+)/) || [])[1] || '';
     const mensaje = (block.match(/MENSAJE:\s*(.+)/) || [])[1] || '';
+    const alerta = (block.match(/ALERTA:\s*(.+)/) || [])[1] || 'NINGUNA';
     const badge = document.getElementById('score-badge');
     badge.style.display = 'block';
     badge.textContent = nota + ' / 5.0';
@@ -191,7 +192,7 @@ function addMessage(role, text) {
       document.getElementById('send-btn').disabled = true;
       document.getElementById('user-input').placeholder = 'Sesión completada ✓';
     }, 100);
-    sendToSheets({ estudiante: studentName, nota, fortalezas, mejorar, mensaje });
+    sendToSheets({ estudiante: studentName, nota, fortalezas, mejorar, mensaje, alerta });
   } else {
     html = marked.parse(text);
   }
