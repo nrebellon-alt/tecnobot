@@ -57,7 +57,7 @@ ALERTA: [NINGUNA o descripción de respuestas sospechosas]
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'qwen/qwen3-32b',
+          model: 'openai/gpt-oss-120b',
           max_tokens: 1000,
           messages: [
             { role: 'system', content: SYSTEM_PROMPT },
