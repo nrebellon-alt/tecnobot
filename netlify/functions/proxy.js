@@ -66,7 +66,7 @@ ALERTA: [NINGUNA o descripción de respuestas sospechosas]
         })
       });
       const result = await response.json();
-      const reply = result.choices?.[0]?.message?.content || 'Error al obtener respuesta.';
+      const reply = result.choices?.[0]?.message?.content || JSON.stringify(result);
       return {
         statusCode: 200,
         headers: {
