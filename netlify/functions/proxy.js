@@ -57,7 +57,7 @@ ALERTA: [NINGUNA o descripción de respuestas sospechosas]
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'llama-3.1-8b-instant',
+          model: 'llama-3.3-70b-versatile',
           max_tokens: 1000,
           messages: [
             { role: 'system', content: SYSTEM_PROMPT },
