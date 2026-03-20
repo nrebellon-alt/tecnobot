@@ -57,7 +57,7 @@ ALERTA: [NINGUNA o descripción de respuestas sospechosas]
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'openai/gpt-oss-120b',
+          model: 'mixtral-8x7b-32768',
           max_tokens: 1000,
           messages: [
             { role: 'system', content: SYSTEM_PROMPT },
