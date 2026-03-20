@@ -77,13 +77,19 @@ ALERTA: [NINGUNA o descripción de respuestas sospechosas]
     }
 
     if (data.action === 'verificar' || data.action === 'guardar') {
-      const sheetsRes = await fetch(SHEETS_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-        redirect: 'follow'
-      });
-      const result = await sheetsRes.json();
+    const sheetsRes = await fetch(SHEETS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+      redirect: 'follow'
+  });
+  const text = await sheetsRes.text();
+  let result;
+  try {
+    result = JSON.parse(text);
+  } catch(e) {
+    result = { ok: false, error: 'Respuesta no es JSON: ' + text.substring(0, 200) };
+  }
       return {
         statusCode: 200,
         headers: {
